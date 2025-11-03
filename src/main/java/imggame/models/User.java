@@ -24,6 +24,16 @@ public class User implements Serializable {
 		this.isOnline = false;
 	}
 
+	public User(int id, String username, String email, int score, int elo) {
+		this.id = id;
+		this.username = username;
+		this.email = email;
+		this.score = score;
+		this.elo = elo;
+		this.isInGame = false;
+		this.isOnline = false;
+	}
+
 	public User(String username, String email, String password) {
 		this.username = username;
 		this.email = email;

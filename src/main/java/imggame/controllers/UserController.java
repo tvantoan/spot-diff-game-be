@@ -51,4 +51,7 @@ public class UserController {
 		return users;
 	}
 
+	public User getUserById(int userId) {
+		return userRepository.findById(userId);
+	}
 }

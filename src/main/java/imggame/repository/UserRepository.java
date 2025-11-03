@@ -134,7 +134,7 @@ public class UserRepository {
 
 			try (ResultSet resultSet = statement.executeQuery()) {
 				while (resultSet.next()) {
-					users.add(mapResultSetToUser(resultSet));
+					users.add(mapResultSetToUserWithoutPassword(resultSet));
 				}
 			}
 		} catch (SQLException e) {
@@ -184,7 +184,7 @@ public class UserRepository {
 		try (PreparedStatement statement = connection.prepareStatement(query);
 				ResultSet resultSet = statement.executeQuery()) {
 			while (resultSet.next()) {
-				users.add(mapResultSetToUser(resultSet));
+				users.add(mapResultSetToUserWithoutPassword(resultSet));
 			}
 		} catch (SQLException e) {
 			throw new RuntimeException("Error fetching online users", e);
@@ -204,4 +204,17 @@ public class UserRepository {
 		user.setInGame(resultSet.getBoolean("is_in_game"));
 		return user;
 	}
+
+	private User mapResultSetToUserWithoutPassword(ResultSet resultSet) throws SQLException {
+		User user = new User(
+				resultSet.getInt("id"),
+				resultSet.getString("username"),
+				resultSet.getString("email"),
+				resultSet.getInt("score"),
+				resultSet.getInt("elo"));
+		user.setOnline(resultSet.getBoolean("is_online"));
+		user.setInGame(resultSet.getBoolean("is_in_game"));
+		return user;
+	}
+
 }

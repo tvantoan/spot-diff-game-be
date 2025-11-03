@@ -13,10 +13,9 @@ public class AppConfig {
 	public static final String DB_HOST = getEnv("DB_HOST");
 	public static final int DB_PORT = getEnvAsInt("DB_PORT", 3306);
 
-	// Application configuration
 	public static final int GAME_MAIN_PORT = getEnvAsInt("GAME_MAIN_PORT", 8080);
+	public static final int MAX_TIME_PER_ROUND_SECONDS = 30;
 
-	// Private helper methods
 	private static String getEnv(String key) {
 		String value = dotenv.get(key);
 		if (value == null) {
@@ -42,13 +41,11 @@ public class AppConfig {
 		}
 	}
 
-	// Get database connection URL
 	public static String getDatabaseUrl() {
 		return String.format("jdbc:mysql://%s:%d/%s?serverTimezone=UTC",
 				DB_HOST, DB_PORT, MYSQL_DATABASE);
 	}
 
-	// Private constructor to prevent instantiation
 	private AppConfig() {
 		throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
 	}
