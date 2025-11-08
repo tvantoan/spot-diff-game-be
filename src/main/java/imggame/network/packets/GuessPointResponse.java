@@ -1,6 +1,7 @@
 package imggame.network.packets;
 
 import imggame.game.DiffBox;
+import imggame.network.types.PacketType;
 
 public class GuessPointResponse extends BasePacket {
 	private static final long serialVersionUID = 1L;
@@ -26,7 +27,7 @@ public class GuessPointResponse extends BasePacket {
 	}
 
 	@Override
-	public String getType() {
-		return "GUESS_POINT_RESPONSE";
+	public PacketType getType() {
+		return PacketType.ROOM_RESPONSE;
 	}
 }

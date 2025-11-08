@@ -1,5 +1,7 @@
 package imggame.network.packets;
 
+import imggame.network.types.PacketType;
+
 public class LoginRequest extends BasePacket {
 	public String username;
 	public String password;
@@ -10,7 +12,7 @@ public class LoginRequest extends BasePacket {
 	}
 
 	@Override
-	public String getType() {
-		return "LOGIN";
+	public PacketType getType() {
+		return PacketType.REQUEST;
 	}
 }

@@ -10,8 +10,8 @@ public class GameRoomManager {
 	private Map<String, GameRoom> gameRooms = new ConcurrentHashMap<>();
 	private Map<Integer, String> playerToRoom = new ConcurrentHashMap<>(); // userId -> roomId
 
-	public GameRoom createRoom(Player player, ImageSet imageSet) {
-		GameRoom room = new GameRoom(player, imageSet);
+	public GameRoom createRoom(Player player) {
+		GameRoom room = new GameRoom(player);
 		gameRooms.put(room.getId(), room);
 		playerToRoom.put(player.info.getId(), room.getId());
 		return room;

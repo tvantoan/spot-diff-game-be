@@ -1,0 +1,396 @@
+[
+    {
+        "diff_image": "2kid_5_1.png",
+        "org_image": "2kid_5_2.png",
+        "width": 940,
+        "height": 528,
+        "diff_boxes": [
+            {
+                "x": 95,
+                "y": 190,
+                "width": 168,
+                "height": 98
+            },
+            {
+                "x": 49,
+                "y": 15,
+                "width": 64,
+                "height": 61
+            },
+            {
+                "x": 385,
+                "y": 355,
+                "width": 175,
+                "height": 147
+            },
+            {
+                "x": 240,
+                "y": 11,
+                "width": 172,
+                "height": 79
+            },
+            {
+                "x": 819,
+                "y": 394,
+                "width": 107,
+                "height": 101
+            }
+        ]
+    },
+    {
+        "diff_image": "beach_6_1.png",
+        "org_image": "beach_6_2.png",
+        "width": 940,
+        "height": 529,
+        "diff_boxes": [
+            {
+                "x": 176,
+                "y": 58,
+                "width": 169,
+                "height": 89
+            },
+            {
+                "x": 329,
+                "y": 266,
+                "width": 63,
+                "height": 79
+            },
+            {
+                "x": 536,
+                "y": 249,
+                "width": 91,
+                "height": 109
+            },
+            {
+                "x": 719,
+                "y": 63,
+                "width": 101,
+                "height": 112
+            },
+            {
+                "x": 399,
+                "y": 463,
+                "width": 138,
+                "height": 63
+            },
+            {
+                "x": 742,
+                "y": 437,
+                "width": 104,
+                "height": 89
+            }
+        ]
+    },
+    {
+        "diff_image": "ocean2_9_1.png",
+        "org_image": "ocean2_9_2.png",
+        "width": 940,
+        "height": 530,
+        "diff_boxes": [
+            {
+                "x": 166,
+                "y": 97,
+                "width": 139,
+                "height": 48
+            },
+            {
+                "x": 356,
+                "y": 160,
+                "width": 43,
+                "height": 89
+            },
+            {
+                "x": 567,
+                "y": 34,
+                "width": 50,
+                "height": 63
+            },
+            {
+                "x": 367,
+                "y": 276,
+                "width": 106,
+                "height": 98
+            },
+            {
+                "x": 0,
+                "y": 331,
+                "width": 67,
+                "height": 87
+            },
+            {
+                "x": 348,
+                "y": 425,
+                "width": 102,
+                "height": 50
+            },
+            {
+                "x": 605,
+                "y": 356,
+                "width": 103,
+                "height": 66
+            },
+            {
+                "x": 797,
+                "y": 224,
+                "width": 143,
+                "height": 166
+            },
+            {
+                "x": 194,
+                "y": 350,
+                "width": 34,
+                "height": 44
+            }
+        ]
+    },
+    {
+        "diff_image": "ocean_7_1.png",
+        "org_image": "ocean_7_2.png",
+        "width": 941,
+        "height": 528,
+        "diff_boxes": [
+            {
+                "x": 15,
+                "y": 155,
+                "width": 117,
+                "height": 118
+            },
+            {
+                "x": 438,
+                "y": 309,
+                "width": 84,
+                "height": 72
+            },
+            {
+                "x": 528,
+                "y": 214,
+                "width": 80,
+                "height": 196
+            },
+            {
+                "x": 303,
+                "y": 455,
+                "width": 93,
+                "height": 71
+            },
+            {
+                "x": 606,
+                "y": 439,
+                "width": 95,
+                "height": 77
+            },
+            {
+                "x": 769,
+                "y": 250,
+                "width": 168,
+                "height": 183
+            },
+            {
+                "x": 703,
+                "y": 4,
+                "width": 130,
+                "height": 99
+            }
+        ]
+    },
+    {
+        "diff_image": "playground2_7_1.png",
+        "org_image": "playground2_7_2.png",
+        "width": 939,
+        "height": 527,
+        "diff_boxes": [
+            {
+                "x": 154,
+                "y": 203,
+                "width": 111,
+                "height": 128
+            },
+            {
+                "x": 459,
+                "y": 234,
+                "width": 92,
+                "height": 85
+            },
+            {
+                "x": 113,
+                "y": 440,
+                "width": 75,
+                "height": 75
+            },
+            {
+                "x": 511,
+                "y": 427,
+                "width": 71,
+                "height": 56
+            },
+            {
+                "x": 636,
+                "y": 296,
+                "width": 103,
+                "height": 130
+            },
+            {
+                "x": 783,
+                "y": 303,
+                "width": 133,
+                "height": 127
+            },
+            {
+                "x": 733,
+                "y": 3,
+                "width": 191,
+                "height": 98
+            }
+        ]
+    },
+    {
+        "diff_image": "playground_5_1.png",
+        "org_image": "playground_5_2.png",
+        "width": 941,
+        "height": 529,
+        "diff_boxes": [
+            {
+                "x": 26,
+                "y": 359,
+                "width": 121,
+                "height": 161
+            },
+            {
+                "x": 755,
+                "y": 369,
+                "width": 71,
+                "height": 65
+            },
+            {
+                "x": 529,
+                "y": 222,
+                "width": 50,
+                "height": 57
+            },
+            {
+                "x": 126,
+                "y": 265,
+                "width": 59,
+                "height": 86
+            },
+            {
+                "x": 744,
+                "y": 0,
+                "width": 193,
+                "height": 238
+            }
+        ]
+    },
+    {
+        "diff_image": "traffic_8_1.png",
+        "org_image": "traffic_8_2.png",
+        "width": 940,
+        "height": 529,
+        "diff_boxes": [
+            {
+                "x": 66,
+                "y": 283,
+                "width": 37,
+                "height": 36
+            },
+            {
+                "x": 265,
+                "y": 40,
+                "width": 151,
+                "height": 120
+            },
+            {
+                "x": 240,
+                "y": 270,
+                "width": 95,
+                "height": 68
+            },
+            {
+                "x": 2,
+                "y": 476,
+                "width": 938,
+                "height": 44
+            },
+            {
+                "x": 836,
+                "y": 161,
+                "width": 63,
+                "height": 152
+            },
+            {
+                "x": 533,
+                "y": 391,
+                "width": 96,
+                "height": 35
+            },
+            {
+                "x": 82,
+                "y": 330,
+                "width": 59,
+                "height": 57
+            },
+            {
+                "x": 665,
+                "y": 67,
+                "width": 55,
+                "height": 82
+            }
+        ]
+    },
+    {
+        "diff_image": "trainb_8_1.png",
+        "org_image": "trainb_8_2.png",
+        "width": 939,
+        "height": 527,
+        "diff_boxes": [
+            {
+                "x": 735,
+                "y": 186,
+                "width": 85,
+                "height": 132
+            },
+            {
+                "x": 603,
+                "y": 251,
+                "width": 43,
+                "height": 47
+            },
+            {
+                "x": 588,
+                "y": 28,
+                "width": 171,
+                "height": 80
+            },
+            {
+                "x": 357,
+                "y": 121,
+                "width": 120,
+                "height": 39
+            },
+            {
+                "x": 199,
+                "y": 334,
+                "width": 38,
+                "height": 49
+            },
+            {
+                "x": 258,
+                "y": 395,
+                "width": 48,
+                "height": 43
+            },
+            {
+                "x": 797,
+                "y": 81,
+                "width": 139,
+                "height": 79
+            },
+            {
+                "x": 95,
+                "y": 66,
+                "width": 53,
+                "height": 37
+            }
+        ]
+    }
+]

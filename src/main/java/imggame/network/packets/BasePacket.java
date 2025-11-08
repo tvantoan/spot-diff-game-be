@@ -2,11 +2,10 @@ package imggame.network.packets;
 
 import java.io.Serializable;
 
-public class BasePacket implements Serializable {
+import imggame.network.types.PacketType;
+
+public abstract class BasePacket implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	public String getType() {
-		return "BasePacket";
-	}
-
+	abstract public PacketType getType();
 }

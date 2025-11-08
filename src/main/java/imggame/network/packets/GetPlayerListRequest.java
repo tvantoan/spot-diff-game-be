@@ -1,5 +1,7 @@
 package imggame.network.packets;
 
+import imggame.network.types.PacketType;
+
 public class GetPlayerListRequest extends BasePacket {
 	public int pageSize;
 	public int offset;
@@ -12,7 +14,7 @@ public class GetPlayerListRequest extends BasePacket {
 	}
 
 	@Override
-	public String getType() {
-		return "GET_PLAYER_LIST";
+	public PacketType getType() {
+		return PacketType.REQUEST;
 	}
 }

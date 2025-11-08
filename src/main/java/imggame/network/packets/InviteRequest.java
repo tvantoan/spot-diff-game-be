@@ -1,5 +1,7 @@
 package imggame.network.packets;
 
+import imggame.network.types.PacketType;
+
 public class InviteRequest extends BasePacket {
 	public int senderId;
 	public int receiverId;
@@ -10,7 +12,7 @@ public class InviteRequest extends BasePacket {
 	}
 
 	@Override
-	public String getType() {
-		return "INVITE";
+	public PacketType getType() {
+		return PacketType.REQUEST;
 	}
 }

@@ -1,5 +1,7 @@
 package imggame.network.packets;
 
+import imggame.network.types.PacketType;
+
 public class ErrorResponse extends BasePacket {
 	public String message;
 
@@ -8,7 +10,7 @@ public class ErrorResponse extends BasePacket {
 	}
 
 	@Override
-	public String getType() {
-		return "ERROR";
+	public PacketType getType() {
+		return PacketType.DIRECT_RESPONSE;
 	}
 }

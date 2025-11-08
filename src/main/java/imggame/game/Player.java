@@ -7,10 +7,12 @@ public class Player {
 	public int score;
 	public boolean isTurn;
 	public int timer;
+	public boolean isReady;
 
 	public Player(User user) {
 		this.info = user;
 		this.isTurn = false;
 		this.score = 0;
+		this.isReady = false;
 	}
 }

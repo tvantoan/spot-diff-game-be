@@ -1,5 +1,7 @@
 package imggame.network.packets;
 
+import imggame.network.types.PacketType;
+
 public class GameMatchingRequest extends BasePacket {
 	public int playerId;
 
@@ -8,7 +10,7 @@ public class GameMatchingRequest extends BasePacket {
 	}
 
 	@Override
-	public String getType() {
-		return "GAME_MATCHING";
+	public PacketType getType() {
+		return PacketType.REQUEST;
 	}
 }

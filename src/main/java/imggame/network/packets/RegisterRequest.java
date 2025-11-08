@@ -1,5 +1,7 @@
 package imggame.network.packets;
 
+import imggame.network.types.PacketType;
+
 public class RegisterRequest extends BasePacket {
 	public String username;
 	public String email;
@@ -12,7 +14,7 @@ public class RegisterRequest extends BasePacket {
 	}
 
 	@Override
-	public String getType() {
-		return "REGISTER";
+	public PacketType getType() {
+		return PacketType.REQUEST;
 	}
 }

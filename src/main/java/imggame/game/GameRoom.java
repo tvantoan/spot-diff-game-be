@@ -7,6 +7,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import imggame.models.User;
+import imggame.utils.GameHelper;
 
 public class GameRoom {
 	private String id;
@@ -31,9 +32,17 @@ public class GameRoom {
 		FINISHED
 	}
 
-	public GameRoom(Player p1, Player p2, ImageSet imageSet) {
+	public GameRoom() {
 		this.id = UUID.randomUUID().toString();
-		this.imageSet = imageSet;
+		this.imageSet = null;
+		this.pointLeftToGuess = 0;
+		this.state = GameState.WAITING;
+		this.timerService = Executors.newScheduledThreadPool(1);
+	}
+
+	public GameRoom(Player p1, Player p2) {
+		this.id = UUID.randomUUID().toString();
+		this.imageSet = GameHelper.getRandomImageSet();
 		this.player1 = p1;
 		this.player2 = p2;
 		this.pointLeftToGuess = imageSet.getTotalDifferences();
@@ -42,9 +51,9 @@ public class GameRoom {
 		this.timerService = Executors.newScheduledThreadPool(1);
 	}
 
-	public GameRoom(Player p1, ImageSet imageSet) {
+	public GameRoom(Player p1) {
 		this.id = UUID.randomUUID().toString();
-		this.imageSet = imageSet;
+		this.imageSet = GameHelper.getRandomImageSet();
 		this.player1 = p1;
 		this.pointLeftToGuess = imageSet.getTotalDifferences();
 		this.state = GameState.WAITING;
@@ -80,8 +89,34 @@ public class GameRoom {
 		return false;
 	}
 
+	public Player getOpponent(int userId) {
+		if (player1 != null && player1.info.getId() == userId) {
+			return player2;
+		} else if (player2 != null && player2.info.getId() == userId) {
+			return player1;
+		}
+		return null;
+	}
+
+	public boolean isAllReady() {
+		return (player1 != null && player1.isReady) && (player2 != null && player2.isReady);
+	}
+
+	public Player getPlayerById(int userId) {
+		if (player1 != null && player1.info.getId() == userId) {
+			return player1;
+		} else if (player2 != null && player2.info.getId() == userId) {
+			return player2;
+		}
+		return null;
+	}
+
 	public boolean isFull() {
 		return this.player1 != null && this.player2 != null;
+	}
+
+	public boolean isEmpty() {
+		return this.player1 == null && this.player2 == null;
 	}
 
 	public boolean hasPlayer(int userId) {
@@ -193,6 +228,19 @@ public class GameRoom {
 		}, 1, 1, TimeUnit.SECONDS);
 	}
 
+	public void resetState() {
+		this.state = GameState.READY;
+		this.pointLeftToGuess = imageSet.getTotalDifferences();
+		this.player1.score = 0;
+		this.player2.score = 0;
+		this.player1.isTurn = true;
+		this.player2.isTurn = false;
+		this.resetTimer();
+		if (timerTask != null) {
+			timerTask.cancel(false);
+		}
+	}
+
 	public void pause() {
 		if (this.state == GameState.PLAYING) {
 			this.state = GameState.PAUSED;
@@ -215,7 +263,10 @@ public class GameRoom {
 		} else if (player2 != null && player2.info.getId() == userId) {
 			player2 = null;
 		}
-
+		if (state == GameState.PLAYING) {
+			this.endGame();
+		}
+		this.state = GameState.WAITING;
 	}
 
 	public void endGame() {
