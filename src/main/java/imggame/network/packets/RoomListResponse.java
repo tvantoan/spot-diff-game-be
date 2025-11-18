@@ -5,21 +5,8 @@ import java.util.List;
 import imggame.game.GameRoom;
 import imggame.network.types.PacketType;
 
-class RoomResponse {
-	public String roomId;
-	public String roomName;
-	public int playerCount;
-	public int maxPlayers;
-
-	public RoomResponse(String roomId, String roomName, int playerCount, int maxPlayers) {
-		this.roomId = roomId;
-		this.roomName = roomName;
-		this.playerCount = playerCount;
-		this.maxPlayers = maxPlayers;
-	}
-}
-
 public class RoomListResponse extends BasePacket {
+	private static final long serialVersionUID = 1L;
 	private List<RoomResponse> rooms;
 
 	public RoomListResponse(List<GameRoom> rooms) {

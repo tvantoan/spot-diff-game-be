@@ -26,7 +26,7 @@ public class GameRoomManager {
 
 	public GameRoom joinRoom(String roomId, Player player) {
 		GameRoom room = gameRooms.get(roomId);
-		if (room != null && room.addPlayer2(player)) {
+		if (room != null && room.addPlayer(player)) {
 			playerToRoom.put(player.info.getId(), roomId);
 			return room;
 		}
@@ -48,6 +48,7 @@ public class GameRoomManager {
 	public void removeRoom(String roomId) {
 		GameRoom room = gameRooms.remove(roomId);
 		if (room != null) {
+			// Cleanup room trước khi xóa
 			room.cleanup();
 
 			if (room.getPlayer1() != null) {
@@ -66,7 +67,7 @@ public class GameRoomManager {
 			GameRoom room = gameRooms.get(roomId);
 			if (room != null) {
 				room.playerLeave(userId);
-				if (room.getState() != GameRoom.GameState.FINISHED) {
+				if (room.isEmpty()) {
 					removeRoom(roomId);
 				}
 			}

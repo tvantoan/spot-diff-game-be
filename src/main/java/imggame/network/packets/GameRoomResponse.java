@@ -30,6 +30,6 @@ public class GameRoomResponse extends BasePacket {
 
 	@Override
 	public PacketType getType() {
-		return PacketType.DIRECT_RESPONSE;
+		return PacketType.ROOM_RESPONSE;
 	}
 }

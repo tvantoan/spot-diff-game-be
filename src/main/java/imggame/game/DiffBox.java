@@ -1,6 +1,9 @@
 package imggame.game;
 
-public class DiffBox {
+import java.io.Serializable;
+
+public class DiffBox implements Serializable {
+	private static final long serialVersionUID = 1L;
 	public int x;
 	public int y;
 	public int width;

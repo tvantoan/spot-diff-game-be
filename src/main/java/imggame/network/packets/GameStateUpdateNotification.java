@@ -1,6 +1,5 @@
 package imggame.network.packets;
 
-import imggame.game.Player;
 import imggame.game.GameRoom.GameState;
 import imggame.network.types.PacketType;
 
@@ -9,14 +8,23 @@ public class GameStateUpdateNotification extends BasePacket {
 
 	public String roomId;
 	public GameState gameState;
-	public Player player1;
-	public Player player2;
+	public int player1Timer;
+	public int player2Timer;
+	public int player1Score;
+	public int player2Score;
+	public int pointLeftToGuess;
+	public boolean isPlayer1Turn;
 
-	public GameStateUpdateNotification(String roomId, GameState gameState, Player player1, Player player2) {
+	public GameStateUpdateNotification(String roomId, GameState gameState, int player1Timer, int player2Timer,
+			int player1Score, int player2Score, int pointLeftToGuess, boolean isPlayer1Turn) {
 		this.roomId = roomId;
 		this.gameState = gameState;
-		this.player1 = player1;
-		this.player2 = player2;
+		this.player1Timer = player1Timer;
+		this.player2Timer = player2Timer;
+		this.player1Score = player1Score;
+		this.player2Score = player2Score;
+		this.pointLeftToGuess = pointLeftToGuess;
+		this.isPlayer1Turn = isPlayer1Turn;
 	}
 
 	@Override

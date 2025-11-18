@@ -1,8 +1,12 @@
 package imggame.game;
 
+import java.io.Serializable;
+
 import imggame.models.User;
 
-public class Player {
+public class Player implements Serializable {
+	private static final long serialVersionUID = 1L;
+
 	public User info;
 	public int score;
 	public boolean isTurn;
