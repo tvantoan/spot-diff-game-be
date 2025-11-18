@@ -11,6 +11,7 @@ import imggame.utils.GameHelper;
 
 public class GameRoom {
 	private String id;
+	private String roomName;
 	private int pointLeftToGuess;
 	private Player player1;
 	private Player player2;
@@ -34,6 +35,7 @@ public class GameRoom {
 
 	public GameRoom() {
 		this.id = UUID.randomUUID().toString();
+		this.roomName = "Room " + this.id.substring(0, 8);
 		this.imageSet = null;
 		this.pointLeftToGuess = 0;
 		this.state = GameState.WAITING;
@@ -42,6 +44,7 @@ public class GameRoom {
 
 	public GameRoom(Player p1, Player p2) {
 		this.id = UUID.randomUUID().toString();
+		this.roomName = "Room " + this.id.substring(0, 8);
 		this.imageSet = GameHelper.getRandomImageSet();
 		this.player1 = p1;
 		this.player2 = p2;
@@ -53,6 +56,17 @@ public class GameRoom {
 
 	public GameRoom(Player p1) {
 		this.id = UUID.randomUUID().toString();
+		this.roomName = "Room " + this.id.substring(0, 8);
+		this.imageSet = GameHelper.getRandomImageSet();
+		this.player1 = p1;
+		this.pointLeftToGuess = imageSet.getTotalDifferences();
+		this.state = GameState.WAITING;
+		this.timerService = Executors.newScheduledThreadPool(1);
+	}
+
+	public GameRoom(Player p1, String roomName) {
+		this.id = UUID.randomUUID().toString();
+		this.roomName = roomName != null && !roomName.isEmpty() ? roomName : "Room " + this.id.substring(0, 8);
 		this.imageSet = GameHelper.getRandomImageSet();
 		this.player1 = p1;
 		this.pointLeftToGuess = imageSet.getTotalDifferences();
@@ -62,6 +76,25 @@ public class GameRoom {
 
 	public String getId() {
 		return this.id;
+	}
+
+	public String getRoomName() {
+		return this.roomName;
+	}
+
+	public void setRoomName(String roomName) {
+		if (roomName != null && !roomName.isEmpty()) {
+			this.roomName = roomName;
+		}
+	}
+
+	public int getTotalPlayers() {
+		int count = 0;
+		if (this.player1 != null)
+			count++;
+		if (this.player2 != null)
+			count++;
+		return count;
 	}
 
 	public GameState getState() {

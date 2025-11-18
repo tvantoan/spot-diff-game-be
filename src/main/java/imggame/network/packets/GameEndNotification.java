@@ -1,6 +1,5 @@
 package imggame.network.packets;
 
-import imggame.models.User;
 import imggame.network.types.PacketType;
 
 public class GameEndNotification extends BasePacket {

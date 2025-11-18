@@ -1,12 +1,9 @@
 package imggame.controllers;
 
-import java.sql.Connection;
 import java.util.List;
 
 import javax.imageio.ImageIO;
 
-import imggame.config.AppConfig;
-import imggame.database.Database;
 import imggame.game.DiffBox;
 import imggame.game.GameRoom;
 import imggame.game.GameRoomManager;
@@ -50,10 +47,11 @@ public class GameController {
 				return new ErrorResponse("Already in a game room");
 			}
 			Player player = new Player(user);
-			GameRoom room = roomManager.createRoom(player);
+			GameRoom room = roomManager.createRoom(player, request.roomName);
 			this.userRepository.updateInGameStatus(player.info.getId(), false);
 			return new GameRoomResponse(
 					room.getId(),
+					room.getRoomName(),
 					room.getState().toString(),
 					player.info,
 					null);
@@ -85,6 +83,7 @@ public class GameController {
 
 			return new GameRoomResponse(
 					room.getId(),
+					room.getRoomName(),
 					room.getState().toString(),
 					room.getPlayer1().info,
 					room.getPlayer2().info);
@@ -311,6 +310,16 @@ public class GameController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ErrorResponse("Error when inviting player: " + e.getMessage());
+		}
+	}
+
+	public Object handleGetRoomList() {
+		try {
+			List<GameRoom> allRooms = this.roomManager.getAllRooms();
+			return new RoomListResponse(allRooms);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ErrorResponse("Error when getting room list: " + e.getMessage());
 		}
 	}
 }
