@@ -11,6 +11,7 @@ import imggame.utils.GameHelper;
 
 public class GameRoom {
 	private String id;
+	private String roomName;
 	private int pointLeftToGuess;
 	private Player player1;
 	private Player player2;
@@ -34,6 +35,7 @@ public class GameRoom {
 
 	public GameRoom() {
 		this.id = UUID.randomUUID().toString();
+		this.roomName = "Room " + this.id.substring(0, 8);
 		this.imageSet = null;
 		this.pointLeftToGuess = 0;
 		this.state = GameState.WAITING;
@@ -42,19 +44,34 @@ public class GameRoom {
 
 	public GameRoom(Player p1, Player p2) {
 		this.id = UUID.randomUUID().toString();
+		this.roomName = "Room " + this.id.substring(0, 8);
 		this.imageSet = GameHelper.getRandomImageSet();
 		this.player1 = p1;
 		this.player2 = p2;
 		this.pointLeftToGuess = imageSet.getTotalDifferences();
 		this.player1.isTurn = true;
+		this.player2.isTurn = false;
 		this.state = GameState.READY;
 		this.timerService = Executors.newScheduledThreadPool(1);
 	}
 
 	public GameRoom(Player p1) {
 		this.id = UUID.randomUUID().toString();
+		this.roomName = "Room " + this.id.substring(0, 8);
 		this.imageSet = GameHelper.getRandomImageSet();
 		this.player1 = p1;
+		this.player1.isTurn = true;
+		this.pointLeftToGuess = imageSet.getTotalDifferences();
+		this.state = GameState.WAITING;
+		this.timerService = Executors.newScheduledThreadPool(1);
+	}
+
+	public GameRoom(Player p1, String roomName) {
+		this.id = UUID.randomUUID().toString();
+		this.roomName = roomName != null && !roomName.isEmpty() ? roomName : "Room " + this.id.substring(0, 8);
+		this.imageSet = GameHelper.getRandomImageSet();
+		this.player1 = p1;
+		this.player1.isTurn = true;
 		this.pointLeftToGuess = imageSet.getTotalDifferences();
 		this.state = GameState.WAITING;
 		this.timerService = Executors.newScheduledThreadPool(1);
@@ -62,6 +79,25 @@ public class GameRoom {
 
 	public String getId() {
 		return this.id;
+	}
+
+	public String getRoomName() {
+		return this.roomName;
+	}
+
+	public void setRoomName(String roomName) {
+		if (roomName != null && !roomName.isEmpty()) {
+			this.roomName = roomName;
+		}
+	}
+
+	public int getTotalPlayers() {
+		int count = 0;
+		if (this.player1 != null)
+			count++;
+		if (this.player2 != null)
+			count++;
+		return count;
 	}
 
 	public GameState getState() {
@@ -80,9 +116,17 @@ public class GameRoom {
 		return this.player2;
 	}
 
-	public boolean addPlayer2(Player p2) {
-		if (this.state == GameState.WAITING && this.player2 == null) {
-			this.player2 = p2;
+	public boolean addPlayer(Player p) {
+		if (this.state != GameState.PLAYING && this.player2 == null) {
+			this.player2 = p;
+			this.player2.isTurn = false;
+			this.state = GameState.READY;
+			return true;
+		}
+
+		if (this.state != GameState.PLAYING && this.player1 == null) {
+			this.player1 = p;
+			this.player1.isTurn = false;
 			this.state = GameState.READY;
 			return true;
 		}
@@ -133,8 +177,12 @@ public class GameRoom {
 	}
 
 	public void resetTimer() {
-		this.player1.timer = MAX_TIME_PER_GUESS;
-		this.player2.timer = MAX_TIME_PER_GUESS;
+		if (this.player1 != null) {
+			this.player1.timer = MAX_TIME_PER_GUESS;
+		}
+		if (this.player2 != null) {
+			this.player2.timer = MAX_TIME_PER_GUESS;
+		}
 	}
 
 	public void switchTurn() {
@@ -153,14 +201,21 @@ public class GameRoom {
 	}
 
 	public int decreaseTimer() {
-		if (this.player1.isTurn) {
-			return --this.player1.timer;
+		if (this.player1 != null && this.player1.isTurn) {
+			this.player1.timer--;
+			System.out.println("Player1 timer: " + this.player1.timer);
+			return this.player1.timer;
 		}
-		return --this.player2.timer;
+		if (this.player2 != null && this.player2.isTurn) {
+			this.player2.timer--;
+			System.out.println("Player2 timer: " + this.player2.timer);
+			return this.player2.timer;
+		}
+		return -1;
 	}
 
 	public boolean isGameOver() {
-		return this.pointLeftToGuess <= 0;
+		return pointLeftToGuess <= 0;
 	}
 
 	public Player getCurrentPlayer() {
@@ -168,6 +223,9 @@ public class GameRoom {
 	}
 
 	public User getWinner() {
+		if (this.player1.score == this.player2.score) {
+			return null;
+		}
 		if (this.player1.score > this.player2.score)
 			return this.player1.info;
 		else if (this.player2.score > this.player1.score)
@@ -177,6 +235,9 @@ public class GameRoom {
 	}
 
 	public User getLoser() {
+		if (this.player1.score == this.player2.score) {
+			return null;
+		}
 		if (this.player1.score < this.player2.score)
 			return this.player1.info;
 		else if (this.player2.score < this.player1.score)
@@ -192,6 +253,8 @@ public class GameRoom {
 
 		DiffBox hitBox = this.imageSet.getDiffBoxCollisionTo(x, y);
 		if (hitBox == null) {
+			switchTurn();
+			resetTimer();
 			return null;
 		}
 		this.pointLeftToGuess--;
@@ -200,41 +263,70 @@ public class GameRoom {
 		} else {
 			this.player2.score += calcPointForGuess(this.player2.timer);
 		}
-		if (pointLeftToGuess <= 0) {
-			endGame();
-		}
+		switchTurn();
+		resetTimer();
 		return hitBox;
 	}
 
 	private int calcPointForGuess(int timeLeft) {
-		return MIN_POINT_PER_GUESS + (timeLeft / MAX_TIME_PER_GUESS) * TIME_FACTOR;
+		return (int) (MIN_POINT_PER_GUESS + (double) ((double) timeLeft / MAX_TIME_PER_GUESS) * TIME_FACTOR);
 	}
 
 	public void start() {
-		if (this.state != GameState.READY || !this.isFull()) {
+		System.out.println("starting game...");
+		if (!this.isFull()) {
+			System.out.println("Room is not full. Cannot start.");
 			return;
 		}
 
+		// Tạo timerService mới nếu đã bị shutdown trước đó
+		if (timerService == null || timerService.isShutdown()) {
+			System.out.println("Creating new timer service...");
+			timerService = Executors.newScheduledThreadPool(1);
+		}
+
+		System.out.println("GameRoom " + this.id + " started.");
 		this.state = GameState.PLAYING;
 		this.startTime = System.currentTimeMillis();
 		this.resetTimer();
+		this.player1.isTurn = true;
+		this.player2.isTurn = false;
+
+		System.out.println("Timer initialized - Player1: " + player1.timer + ", Player2: " + player2.timer);
+		System.out.println("Current turn - Player1: " + player1.isTurn + ", Player2: " + player2.isTurn);
 
 		timerTask = timerService.scheduleAtFixedRate(() -> {
-			int timeLeft = this.decreaseTimer();
-			if (timeLeft <= 0) {
-				switchTurn();
-				resetTimer();
+			try {
+				int timeLeft = this.decreaseTimer();
+				System.out.println("Time left: " + timeLeft);
+				if (timeLeft <= 0) {
+					System.out.println("Time's up! Switching turn...");
+					switchTurn();
+					resetTimer();
+				}
+			} catch (Exception e) {
+				System.err.println("Error in timer task: " + e.getMessage());
+				e.printStackTrace();
 			}
 		}, 1, 1, TimeUnit.SECONDS);
+
+		System.out.println("Timer task scheduled successfully");
 	}
 
 	public void resetState() {
 		this.state = GameState.READY;
+		this.imageSet = GameHelper.getRandomImageSet();
 		this.pointLeftToGuess = imageSet.getTotalDifferences();
-		this.player1.score = 0;
-		this.player2.score = 0;
-		this.player1.isTurn = true;
-		this.player2.isTurn = false;
+		if (player1 != null) {
+			this.player1.isReady = false;
+			this.player1.timer = 0;
+			this.player1.score = 0;
+		}
+		if (player2 != null) {
+			this.player2.isReady = false;
+			this.player2.timer = 0;
+			this.player2.score = 0;
+		}
 		this.resetTimer();
 		if (timerTask != null) {
 			timerTask.cancel(false);
@@ -258,39 +350,55 @@ public class GameRoom {
 	}
 
 	public void playerLeave(int userId) {
+		System.out.println("Player " + userId + " is leaving room " + this.id);
+
+		// Xóa player khỏi phòng
 		if (player1 != null && player1.info.getId() == userId) {
 			player1 = null;
+			System.out.println("Removed player1");
 		} else if (player2 != null && player2.info.getId() == userId) {
 			player2 = null;
+			System.out.println("Removed player2");
 		}
-		if (state == GameState.PLAYING) {
-			this.endGame();
+
+		// Nếu còn player, đặt trạng thái về WAITING
+		if (!isEmpty()) {
+			this.state = GameState.WAITING;
+			System.out.println("Room now in WAITING state");
+		} else {
+			System.out.println("Room is now empty");
 		}
-		this.state = GameState.WAITING;
+		this.resetState();
 	}
 
 	public void endGame() {
+		System.out.println("Ending game for room " + this.id);
 		this.state = GameState.FINISHED;
 		this.endTime = System.currentTimeMillis();
+		this.resetState();
 
+		// Chỉ cancel task, KHÔNG shutdown timerService để có thể tái sử dụng
 		if (timerTask != null) {
 			timerTask.cancel(false);
+			timerTask = null;
+			System.out.println("Timer task cancelled");
 		}
 
+		// KHÔNG shutdown timerService ở đây nữa - sẽ được shutdown khi room bị xóa
+		System.out.println("Game ended successfully");
+	}
+
+	// Method cleanup để gọi khi room bị xóa hoàn toàn
+	public void cleanup() {
+		System.out.println("Cleaning up room " + this.id);
+		if (timerTask != null) {
+			timerTask.cancel(false);
+			timerTask = null;
+		}
 		if (timerService != null && !timerService.isShutdown()) {
 			timerService.shutdown();
+			System.out.println("Timer service shutdown");
 		}
-	}
-
-	public long getGameDuration() {
-		if (endTime > 0 && startTime > 0) {
-			return (endTime - startTime) / 1000;
-		}
-		return 0;
-	}
-
-	public void cleanup() {
-		endGame();
 	}
 
 }

@@ -16,6 +16,7 @@ import imggame.config.AppConfig;
 import imggame.controllers.GameController;
 import imggame.controllers.UserController;
 import imggame.game.GameRoom;
+import imggame.game.Player;
 import imggame.models.User;
 import imggame.network.packets.BasePacket;
 import imggame.network.packets.CreateGameRoomRequest;
@@ -23,12 +24,15 @@ import imggame.network.packets.ErrorResponse;
 import imggame.network.packets.GameStateUpdateNotification;
 import imggame.network.packets.GetImageRequest;
 import imggame.network.packets.GetPlayerListRequest;
+import imggame.network.packets.GetRoomRequest;
 import imggame.network.packets.GuessPointRequest;
 import imggame.network.packets.JoinGameRoomRequest;
 import imggame.network.packets.LeaveGameRoomRequest;
 import imggame.network.packets.LoginRequest;
+import imggame.network.packets.MessagePacket;
 import imggame.network.packets.RegisterRequest;
 import imggame.network.packets.StartGameRequest;
+import imggame.network.types.MessageContext;
 import imggame.network.types.PacketType;
 
 public class GameServer {
@@ -37,7 +41,6 @@ public class GameServer {
 	private GameController gameController = new GameController();
 	private ExecutorService threadPool;
 	private ScheduledExecutorService timerScheduler;
-	private ScheduledExecutorService cleanupScheduler;
 	private Map<Integer, ClientHandler> connectedClients = new ConcurrentHashMap<>();
 	private volatile boolean running = true;
 
@@ -45,7 +48,6 @@ public class GameServer {
 		int serverPort = AppConfig.GAME_MAIN_PORT;
 		this.threadPool = Executors.newCachedThreadPool();
 		this.timerScheduler = Executors.newScheduledThreadPool(1);
-		this.cleanupScheduler = Executors.newScheduledThreadPool(1);
 
 		try {
 			this.serverSocket = new ServerSocket(serverPort);
@@ -94,9 +96,6 @@ public class GameServer {
 			if (timerScheduler != null && !timerScheduler.isShutdown()) {
 				timerScheduler.shutdown();
 			}
-			if (cleanupScheduler != null && !cleanupScheduler.isShutdown()) {
-				cleanupScheduler.shutdown();
-			}
 
 			connectedClients.values().forEach(ClientHandler::close);
 			connectedClients.clear();
@@ -110,18 +109,18 @@ public class GameServer {
 	private void startTimerUpdateTask() {
 		timerScheduler.scheduleAtFixedRate(() -> {
 			try {
-				gameController.getRoomManager().getAllRooms().forEach(room -> {
-					if (room.getState() == GameRoom.GameState.PLAYING && room.isFull()) {
-						GameStateUpdateNotification update = new GameStateUpdateNotification(
-								room.getId(),
-								room.getState(),
-								room.getPlayer1(),
-								room.getPlayer2());
-
-						sendToClient(room.getPlayer1().info.getId(), update);
-						sendToClient(room.getPlayer2().info.getId(), update);
+				Object response = gameController.updateRoomStates();
+				if (response != null) {
+					GameStateUpdateNotification notification = (GameStateUpdateNotification) response;
+					GameRoom room = gameController.getRoomManager().getRoom(notification.roomId);
+					if (room != null) {
+						int player1Id = room.getPlayer1().info.getId();
+						int player2Id = room.getPlayer2().info.getId();
+						sendToClient(player1Id, notification);
+						sendToClient(player2Id, notification);
 					}
-				});
+				}
+
 			} catch (Exception e) {
 				System.err.println("Error in timer update task: " + e.getMessage());
 			}
@@ -213,11 +212,41 @@ public class GameServer {
 					GuessPointRequest guessPoint = (GuessPointRequest) request;
 					response = gameController.handleGuessPoint(guessPoint);
 
+				} else if (request instanceof GetRoomRequest) {
+					GetRoomRequest getRoomRequest = (GetRoomRequest) request;
+					response = gameController.handleGetGameRoomInfo(getRoomRequest);
+
 				} else if (request instanceof LeaveGameRoomRequest) {
 					LeaveGameRoomRequest leaveRoom = (LeaveGameRoomRequest) request;
 					response = gameController.handleLeaveGameRoom(leaveRoom);
 
-				} else {
+					// Gửi response trước, sau đó mới xóa player khỏi room
+					if (response != null) {
+						if (response instanceof ErrorResponse) {
+							System.out.println("Sending error response: " + ((ErrorResponse) response).message);
+						}
+						if (response instanceof BasePacket) {
+							handleSendResponse(response);
+						} else {
+							sendDirectResponse(response);
+						}
+					}
+
+					// SAU KHI đã gửi response, mới xóa player khỏi room
+					System.out.println("Response sent, now removing player from room...");
+					gameController.finalizePlayerLeave(leaveRoom.userId);
+
+					// Set response = null để skip phần gửi response bên dưới
+					response = null;
+
+				} else if (request instanceof MessagePacket) {
+					MessagePacket msgPacket = (MessagePacket) request;
+					if (msgPacket.context.equals(MessageContext.GET_ROOM_LIST)) {
+						response = gameController.handleGetRoomList();
+					}
+				}
+
+				else {
 					response = new ErrorResponse("Unknown request type");
 				}
 
@@ -242,6 +271,7 @@ public class GameServer {
 
 		private void sendDirectResponse(Object response) {
 			try {
+				System.out.println("Sending direct response to userId " + userId);
 				synchronized (output) {
 					output.writeObject(response);
 					output.flush();
@@ -261,8 +291,12 @@ public class GameServer {
 			if (res.getType().equals(PacketType.ROOM_RESPONSE)) {
 				GameRoom room = gameController.getRoomManager().getRoomByPlayer(userId);
 				if (room != null) {
-					int otherPlayerId = room.getOpponent(userId).info.getId();
 					sendToClient(this.userId, res);
+					Player opponent = room.getOpponent(userId);
+					if (opponent == null) {
+						return;
+					}
+					int otherPlayerId = opponent.info.getId();
 					sendToClient(otherPlayerId, res);
 				}
 
