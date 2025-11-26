@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import imggame.network.packets.ErrorResponse;
+
 public class GameRoomManager {
 	private Map<String, GameRoom> gameRooms = new ConcurrentHashMap<>();
 	private Map<Integer, String> playerToRoom = new ConcurrentHashMap<>(); // userId -> roomId
@@ -24,11 +26,21 @@ public class GameRoomManager {
 		return room;
 	}
 
-	public GameRoom joinRoom(String roomId, Player player) {
+	public Object joinRoom(String roomId, Player player) {
 		GameRoom room = gameRooms.get(roomId);
+		if (room == null) {
+			return new ErrorResponse("Game room not found");
+		}
+		if (room.isEmpty()) {
+			return new ErrorResponse("Room is empty!");
+
+		}
+		if (room.isFull()) {
+			return new ErrorResponse("Room is full!");
+		}
 		if (room != null && room.addPlayer(player)) {
 			playerToRoom.put(player.info.getId(), roomId);
-			return room;
+			return (GameRoom) room;
 		}
 		return null;
 	}
@@ -94,5 +106,4 @@ public class GameRoomManager {
 	public List<GameRoom> getAllRooms() {
 		return new ArrayList<>(gameRooms.values());
 	}
-
 }

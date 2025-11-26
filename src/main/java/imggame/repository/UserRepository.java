@@ -217,4 +217,22 @@ public class UserRepository {
 		return user;
 	}
 
+	public List<User> findUsersOnlineAroundElo(int userId) throws SQLException {
+		String query = "SELECT * FROM users WHERE elo BETWEEN (SELECT elo - 100 FROM users WHERE id = ?) AND (SELECT elo + 100 FROM users WHERE id = ?) AND is_online = TRUE AND id != ?";
+		List<User> users = new ArrayList<>();
+		try (PreparedStatement statement = connection.prepareStatement(query)) {
+			statement.setInt(1, userId);
+			statement.setInt(2, userId);
+			statement.setInt(3, userId);
+			try (ResultSet resultSet = statement.executeQuery()) {
+				while (resultSet.next()) {
+					users.add(mapResultSetToUserWithoutPassword(resultSet));
+				}
+			}
+		} catch (SQLException e) {
+			throw new RuntimeException("Error fetching users around ELO for user ID: " + userId, e);
+		}
+		return users;
+	}
+
 }

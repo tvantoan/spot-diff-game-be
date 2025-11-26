@@ -58,7 +58,7 @@ public class GameController {
 					null);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return new ErrorResponse("Error when create ew room " + e.getMessage());
+			return new ErrorResponse("Error when create new room " + e.getMessage());
 		}
 	}
 
@@ -67,19 +67,19 @@ public class GameController {
 			if (roomManager.isPlayerInRoom(request.userId)) {
 				return new ErrorResponse("You are already in a game room");
 			}
-
 			User user = this.userRepository.findById(request.userId);
 			if (user == null) {
 				return new ErrorResponse("User not found");
 			}
+			// GameRoom room = roomManager.getRoom(request.roomId);
 
 			Player player = new Player(user);
 
-			GameRoom room = roomManager.joinRoom(request.roomId, player);
-
-			if (room == null) {
-				return new ErrorResponse("Cannot join the game room");
+			Object response = roomManager.joinRoom(request.roomId, player);
+			if (response instanceof ErrorResponse) {
+				return response;
 			}
+			GameRoom room = (GameRoom) response;
 			this.userRepository.updateInGameStatus(player.info.getId(), true);
 
 			return new GameRoomResponse(
@@ -443,14 +443,23 @@ public class GameController {
 
 	public Object handleInviteRequest(InviteRequest request) {
 		try {
-			User inviteUser = this.userRepository.findById(request.senderId);
-			if (inviteUser == null) {
-				return new ErrorResponse("User not found");
+			User receiver = this.userRepository.findById(request.receiverId);
+			User sender = this.userRepository.findById(request.senderId);
+
+			if (receiver == null) {
+				return new ErrorResponse("Receiver not found");
 			}
-			this.userRepository.updateInGameStatus(request.senderId, true);
-			GameRoom room = this.roomManager.createRoom(new Player(inviteUser));
-			InviteResponse response = new InviteResponse(inviteUser, room.getId());
-			return response;
+			if (!receiver.isOnline()) {
+				return new ErrorResponse("User is not currently online!");
+			}
+			GameRoom room = this.roomManager.getRoomByPlayer(request.senderId);
+			if (room == null) {
+				return new ErrorResponse("Room not found");
+			}
+			InviteResponse invite = new InviteResponse(request.receiverId, sender, room.getId());
+
+			return invite;
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ErrorResponse("Error when inviting player: " + e.getMessage());
@@ -466,4 +475,5 @@ public class GameController {
 			return new ErrorResponse("Error when getting room list: " + e.getMessage());
 		}
 	}
+
 }

@@ -23,9 +23,12 @@ import imggame.network.packets.CreateGameRoomRequest;
 import imggame.network.packets.ErrorResponse;
 import imggame.network.packets.GameStateUpdateNotification;
 import imggame.network.packets.GetImageRequest;
+import imggame.network.packets.GetOnlineUsersRequest;
 import imggame.network.packets.GetPlayerListRequest;
 import imggame.network.packets.GetRoomRequest;
 import imggame.network.packets.GuessPointRequest;
+import imggame.network.packets.InviteRequest;
+import imggame.network.packets.InviteResponse;
 import imggame.network.packets.JoinGameRoomRequest;
 import imggame.network.packets.LeaveGameRoomRequest;
 import imggame.network.packets.LoginRequest;
@@ -110,7 +113,7 @@ public class GameServer {
 		timerScheduler.scheduleAtFixedRate(() -> {
 			try {
 				Object response = gameController.updateRoomStates();
-				if (response != null) {
+				if (response instanceof GameStateUpdateNotification) {
 					GameStateUpdateNotification notification = (GameStateUpdateNotification) response;
 					GameRoom room = gameController.getRoomManager().getRoom(notification.roomId);
 					if (room != null) {
@@ -119,6 +122,9 @@ public class GameServer {
 						sendToClient(player1Id, notification);
 						sendToClient(player2Id, notification);
 					}
+				} else if (response != null) {
+					// unexpected type returned from updateRoomStates(); log it
+					System.err.println("updateRoomStates returned unexpected type: " + response.getClass().getName());
 				}
 
 			} catch (Exception e) {
@@ -244,9 +250,22 @@ public class GameServer {
 					if (msgPacket.context.equals(MessageContext.GET_ROOM_LIST)) {
 						response = gameController.handleGetRoomList();
 					}
-				}
-
-				else {
+				} else if (request instanceof GetOnlineUsersRequest) {
+					GetOnlineUsersRequest userId = (GetOnlineUsersRequest) request;
+					response = userController.handleGetOnlineUsers(userId);
+				} else if (request instanceof InviteRequest) {
+					InviteRequest inviteRequest = (InviteRequest) request;
+					response = gameController.handleInviteRequest(inviteRequest);
+					if (response instanceof InviteResponse) {
+						InviteResponse invite = (InviteResponse) response;
+						boolean delivered = sendToClient(invite.receiverId, invite);
+						if (delivered) {
+							response = new MessagePacket("Invite delivered", MessageContext.OPERATION_SUCCESS);
+						} else {
+							response = new MessagePacket("User is offline", MessageContext.OPERATION_FAILED);
+						}
+					}
+				} else {
 					response = new ErrorResponse("Unknown request type");
 				}
 
@@ -286,6 +305,7 @@ public class GameServer {
 			BasePacket res = (BasePacket) response;
 			if (res.getType().equals(PacketType.DIRECT_RESPONSE)) {
 				sendDirectResponse(response);
+				return;
 			}
 
 			if (res.getType().equals(PacketType.ROOM_RESPONSE)) {
@@ -352,10 +372,14 @@ public class GameServer {
 
 	}
 
-	public void sendToClient(int userId, BasePacket packet) {
+	public boolean sendToClient(int userId, BasePacket packet) {
 		ClientHandler handler = connectedClients.get(userId);
 		if (handler != null && handler.isActive()) {
 			handler.sendDirectResponse(packet);
+			return true;
 		}
+
+		System.out.println("sendToClient: user " + userId + " not connected or inactive");
+		return false;
 	}
 }

@@ -1,12 +1,15 @@
 package imggame.controllers;
 
+import java.sql.SQLException;
+import java.util.List;
+
 import imggame.models.User;
 import imggame.network.packets.ErrorResponse;
+import imggame.network.packets.GetOnlineUsersRequest;
 import imggame.network.packets.GetPlayerListRequest;
 import imggame.network.packets.LoginRequest;
 import imggame.network.packets.RegisterRequest;
 import imggame.repository.UserRepository;
-import java.util.List;
 
 public class UserController {
 	private UserRepository userRepository;
@@ -53,5 +56,10 @@ public class UserController {
 
 	public User getUserById(int userId) {
 		return userRepository.findById(userId);
+	}
+
+	public List<User> handleGetOnlineUsers(GetOnlineUsersRequest request) throws SQLException {
+		List<User> onlineUsers = userRepository.findUsersOnlineAroundElo(request.userId);
+		return onlineUsers;
 	}
 }
